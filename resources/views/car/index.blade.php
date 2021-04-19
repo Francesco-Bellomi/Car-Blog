@@ -11,6 +11,7 @@
                     <div class="card-body">
                         <img src="{{Storage::url($car->img)}}" class="card-img-top " alt="...">
                         <a href="{{route('car.show', compact('car'))}}" class="btn btn-red m-3">Vedi proprietario!</a>
+                        
                     </div>
                 </div>
             </div>

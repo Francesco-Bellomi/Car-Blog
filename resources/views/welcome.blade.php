@@ -1,8 +1,10 @@
 <x-layout>
 
     @if (session('message'))
+    
     <div class="mt-5 pt-5"></div>
     <div class="mt-5 pt-5"></div>
+
         <div class='alert alert-danger'>
             {{ session('message') }}
         </div>

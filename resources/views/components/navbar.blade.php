@@ -1,6 +1,6 @@
 
 @guest
-<nav class="navbar navbar-expand-md border-bot-top-main bg-white fixed-top mb-5 d-flex justify-content-between">
+<nav class="navbar navbar-expand-md border-bot-top-main bg-white sticky-top d-flex justify-content-between">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{route('welcome')}}">
             <img src="/img/logo.jpg"  alt="">

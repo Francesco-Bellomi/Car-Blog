@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\CarRequest;
+use Illuminate\Support\Facades\Auth;
 
 class CarController extends Controller
 {
@@ -44,6 +46,7 @@ class CarController extends Controller
             'description'=>$request->input('description'),
             'userimg'=>$request->file('userimg')->store('/public/store'),
             'img'=>$request->file('img')->store('public/img'),
+            'user_id'=>Auth::id(),
         ]);
             
         return redirect('car/index');
@@ -69,7 +72,7 @@ class CarController extends Controller
      */
     public function edit(Car $car)
     {
-        //
+        return view('car.edit', compact('car'));
     }
 
     /**
@@ -81,7 +84,20 @@ class CarController extends Controller
      */
     public function update(Request $request, Car $car)
     {
-        //
+        $car->model = $request->model;
+        $car->owner = $request->owner;
+        $car->description= $request->description;
+
+        if($request->img){
+            $car->img= $request->file('img')->store('public/img');
+        }
+        $car->save();
+        if($request->userimg){
+            $car->userimg=$request->file('userimg')->store('public/img');
+        }
+        $car->save();
+
+        return redirect(route('car.show', compact('car')));
     }
 
     /**
@@ -92,6 +108,16 @@ class CarController extends Controller
      */
     public function destroy(Car $car)
     {
-        //
+        $car->delete();
+
+        return redirect(route('car.index',compact('car')));
     }
+
+    public function auth($auth){
+
+        $cars = Car::where('user_id' , $auth)->get();
+        $user = User::find($auth);
+        return view('car.auth', compact('cars' , 'user'));
+    }
+
 }

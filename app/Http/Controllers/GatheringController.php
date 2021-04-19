@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Gathering;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\GatheringRequest;
 
 class GatheringController extends Controller
@@ -43,6 +45,7 @@ class GatheringController extends Controller
             'date'=>$request->input('date'),
             'description'=>$request->input('description'),
             'img'=>$request->file('img')->store('/public/img'),
+            'user_id'=>Auth::id(),
         ]);
 
         return redirect(route('gathering.index'));
@@ -67,7 +70,7 @@ class GatheringController extends Controller
      */
     public function edit(Gathering $gathering)
     {
-        //
+        return view('gathering.edit', compact('gathering'));
     }
 
     /**
@@ -79,7 +82,17 @@ class GatheringController extends Controller
      */
     public function update(Request $request, Gathering $gathering)
     {
-        //
+        $gathering->title = $request->title;
+        $gathering->date = $request->date;
+        $gathering->location = $request->location;
+        $gathering->description = $request->description;
+        if($request->img){
+            
+            $gathering->img = $request->file('img')->store('public/img');
+        }
+        $gathering->save();
+
+        return redirect(route('gathering.index'));
     }
 
     /**
@@ -90,6 +103,17 @@ class GatheringController extends Controller
      */
     public function destroy(Gathering $gathering)
     {
-        //
+        $gathering->delete();
+        return redirect(route('gathering.index'));
     }
+
+    public function auth($auth){
+
+        $gatherings = Gathering::where('user_id', $auth)->get();
+        $user = User::find($auth);
+        return view('gathering.auth' , compact('gatherings' , 'user'));
+
+    }
+
+
 }
