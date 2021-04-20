@@ -27,6 +27,17 @@
                         <input type="file" name="img" class="form-control" id="exampleInputimg">
                     </div>
                     <div class="mb-3">
+                        <label for="exampleInputmodel" class="form-label">Hai partecipato a eventi?</label>
+                        <select name="gathering[]" multiple >
+                            <option value="">Ancora a nessuno</option>
+                            @foreach ($gatherings as $gathering)
+                            <option value="{{$gathering->id}}">{{$gathering->title}}</option>
+                                
+                            @endforeach
+
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label for="exampleInputowner" class="form-label">Inserisci Il tuo nome!</label>
                         <input type="text" name="owner" class="form-control" id="exampleInputowner"
                             aria-describedby="emailHelp">

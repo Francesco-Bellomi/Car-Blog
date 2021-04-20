@@ -6,10 +6,16 @@ use App\Models\Car;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\CarRequest;
+use App\Models\Gathering;
 use Illuminate\Support\Facades\Auth;
 
 class CarController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -18,7 +24,7 @@ class CarController extends Controller
     public function index()
     {
         $cars = Car::all();
-        return view('car/index' , compact('cars'));
+        return view('car/index', compact('cars'));
     }
 
     /**
@@ -28,7 +34,9 @@ class CarController extends Controller
      */
     public function create()
     {
-        return view('car.create');
+        $gatherings = Gathering::all();
+
+        return view('car.create', compact('gatherings'));
     }
 
     /**
@@ -39,18 +47,41 @@ class CarController extends Controller
      */
     public function store(CarRequest $request)
     {
-        // dd($request->all()),
-        $cars = Car::create([
-            'owner'=>$request->input('owner'),
-            'model'=>$request->input('model'),
-            'description'=>$request->input('description'),
-            'userimg'=>$request->file('userimg')->store('/public/store'),
-            'img'=>$request->file('img')->store('public/img'),
-            'user_id'=>Auth::id(),
-        ]);
-            
-        return redirect('car/index');
+        // if ($request->car) {
 
+        //     $gathering = Gathering::find($request->gathering);
+
+
+        //     $gathering->cars()->create([
+
+        //         'owner'=>$request->input('owner'),
+        //         'model'=>$request->input('model'),
+        //         'description'=>$request->input('description'),
+        //         'userimg'=>$request->file('userimg')->store('/public/store'),
+        //         'img'=>$request->file('img')->store('public/img'),
+        //         'user_id'=>Auth::id(),
+
+        //     ]);
+        // }
+
+
+        $car = Car::create([
+            'owner' => $request->input('owner'),
+            'model' => $request->input('model'),
+            'description' => $request->input('description'),
+            'userimg' => $request->file('userimg')->store('/public/store'),
+            'img' => $request->file('img')->store('public/img'),
+            'user_id' => Auth::id(),
+        ]);
+        foreach ($request->gathering as $gathering) {
+
+            if ($gathering != null) {
+                $car->gatherings()->attach($gathering);
+            }
+            return redirect(route('car.index'));
+        }
+
+        return redirect(route('car.index'));
     }
 
     /**
@@ -61,7 +92,7 @@ class CarController extends Controller
      */
     public function show(Car $car)
     {
-        return view('car.show' , compact('car'));
+        return view('car.show', compact('car'));
     }
 
     /**
@@ -72,7 +103,10 @@ class CarController extends Controller
      */
     public function edit(Car $car)
     {
-        return view('car.edit', compact('car'));
+
+        $gatherings = Gathering::all();
+
+        return view('car.edit', compact('car', 'gatherings'));
     }
 
     /**
@@ -86,16 +120,19 @@ class CarController extends Controller
     {
         $car->model = $request->model;
         $car->owner = $request->owner;
-        $car->description= $request->description;
+        $car->description = $request->description;
 
-        if($request->img){
-            $car->img= $request->file('img')->store('public/img');
+        if ($request->img) {
+            $car->img = $request->file('img')->store('public/img');
         }
         $car->save();
-        if($request->userimg){
-            $car->userimg=$request->file('userimg')->store('public/img');
+        if ($request->userimg) {
+            $car->userimg = $request->file('userimg')->store('public/img');
         }
+
         $car->save();
+
+        $car->gatherings()->attach($request->gathering);
 
         return redirect(route('car.show', compact('car')));
     }
@@ -108,16 +145,22 @@ class CarController extends Controller
      */
     public function destroy(Car $car)
     {
+        foreach ($car->gatherings as $gathering) {
+
+            $car->gatherings()->detach($gathering->id);
+        }
+
+
         $car->delete();
 
-        return redirect(route('car.index',compact('car')));
+        return redirect(route('car.index', compact('car')));
     }
 
-    public function auth($auth){
+    public function auth($auth)
+    {
 
-        $cars = Car::where('user_id' , $auth)->get();
+        $cars = Car::where('user_id', $auth)->get();
         $user = User::find($auth);
-        return view('car.auth', compact('cars' , 'user'));
+        return view('car.auth', compact('cars', 'user'));
     }
-
 }
